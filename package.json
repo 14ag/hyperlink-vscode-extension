@@ -1,0 +1,30 @@
+{
+  "name": "hyperlink-dashboard",
+  "displayName": "Hyperlink Dashboard",
+  "description": "Replaces the empty editor watermark with a custom interactive dashboard.",
+  "version": "0.0.1",
+  "publisher": "your-publisher-name",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "activationEvents": [
+    "onStartupFinished",
+    "onCommand:extension.showDashboard"
+  ],
+  "main": "extension.js",
+  "scripts": {
+    "package": "npx vsce package",
+    "package:install": "npx vsce package && code --install-extension ./$(node -p \"require('./package.json').name + '-' + require('./package.json').version + '.vsix'\")"
+  },
+  "devDependencies": {
+    "vsce": "^2.11.0"
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "extension.showDashboard",
+        "title": "Show Hyperlink Dashboard"
+      }
+    ]
+  }
+}
