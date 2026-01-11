@@ -1,30 +1,45 @@
 {
-  "name": "hyperlink-dashboard",
-  "displayName": "Hyperlink Dashboard",
-  "description": "Replaces the empty editor watermark with a custom interactive dashboard.",
-  "version": "0.0.1",
-  "publisher": "your-publisher-name",
-  "engines": {
-    "vscode": "^1.60.0"
-  },
-  "activationEvents": [
-    "onStartupFinished",
-    "onCommand:extension.showDashboard"
-  ],
-  "main": "extension.js",
-  "scripts": {
-    "package": "npx vsce package",
-    "package:install": "npx vsce package && code --install-extension ./$(node -p \"require('./package.json').name + '-' + require('./package.json').version + '.vsix'\")"
-  },
-  "devDependencies": {
-    "vsce": "^2.11.0"
-  },
-  "contributes": {
-    "commands": [
-      {
-        "command": "extension.showDashboard",
-        "title": "Show Hyperlink Dashboard"
-      }
-    ]
-  }
+    "name": "hyperlink-vscode-extension",
+    "displayName": "Hyperlink VS Code Watermark",
+    "description": "Transforms the hardcoded VS Code watermark into interactive hyperlinks.",
+    "version": "1.1.0",
+    "publisher": "philip",
+    "icon": "icon.png",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/philip/hyperlink-vscode-extension"
+    },
+    "keywords": [
+        "watermark",
+        "hyperlink",
+        "ui",
+        "customization",
+        "workbench"
+    ],
+    "license": "MIT",
+    "engines": {
+        "vscode": "^1.60.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [
+        "onStartupFinished"
+    ],
+    "main": "./extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "hyperlink-vscode-extension.patch",
+                "title": "Apply Watermark Patch"
+            },
+            {
+                "command": "hyperlink-vscode-extension.unpatch",
+                "title": "Remove Watermark Patch (Uninstall)"
+            }
+        ]
+    },
+    "scripts": {
+        "postinstall": "node patcher.js patch"
+    }
 }

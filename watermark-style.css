@@ -1,0 +1,12 @@
+/* Custom CSS for Watermark Hyperlinks */
+.custom-hyperlink {
+    text-decoration: none; /* Identical to original state */
+    color: inherit; /* Maintain theme-aware color */
+    cursor: pointer;
+    transition: text-decoration 0.2s ease;
+}
+
+.custom-hyperlink:hover {
+    text-decoration: underline; /* The requested visual change */
+    color: var(--vscode-textLink-foreground); /* Use theme's link color for accent */
+}

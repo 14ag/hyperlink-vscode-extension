@@ -1,4 +1,0 @@
-refering to capture2.png
-make the text on the vscode intro screen hyperlinks
-	the strings "recents", "all commands"...etc
-rightclick to add or remove to gitignore
