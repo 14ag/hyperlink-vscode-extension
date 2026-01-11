@@ -34,8 +34,8 @@ function getPaths() {
     return { workbenchHtml, settingsPath };
 }
 
-function patch() {
-    const { workbenchHtml, settingsPath } = getPaths();
+function patch(customPaths) {
+    const { workbenchHtml, settingsPath } = customPaths || getPaths();
     if (!fs.existsSync(workbenchHtml)) throw new Error(`Could not find workbench.html at ${workbenchHtml}`);
 
     // 1. Patch workbench.html
@@ -68,8 +68,8 @@ function patch() {
     }
 }
 
-function unpatch() {
-    const { workbenchHtml, settingsPath } = getPaths();
+function unpatch(customPaths) {
+    const { workbenchHtml, settingsPath } = customPaths || getPaths();
 
     // 1. Unpatch workbench.html
     if (fs.existsSync(workbenchHtml)) {
@@ -107,4 +107,4 @@ if (args[0] === 'patch') {
     unpatch();
 }
 
-module.exports = { patch, unpatch };
+module.exports = { patch, unpatch, getPaths };
