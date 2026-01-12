@@ -1,5 +1,5 @@
 {
-    "name": "hyperlink-vscode-dashboard",
+    "name": "hlink-dashb",
     "displayName": "Hyperlink VS Code Dashboard",
     "description": "Transforms the hardcoded VS Code watermark into interactive hyperlinks.",
   "version": "1.1.2612",
@@ -18,7 +18,7 @@
     ],
     "license": "MIT",
     "engines": {
-        "vscode": "^1.60.0"
+        "vscode": "^1.90.0"
     },
     "categories": [
         "Other"
@@ -40,6 +40,16 @@
         ]
     },
     "scripts": {
-        "postinstall": "node patcher.js patch"
+        "postinstall": "node patcher.js patch",
+        "package:vsix": "vsce package --skip-license -o extension.vsix",
+        "test:unit": "mocha --timeout 10000 \"test/suite/**/whitebox.test.js\" --bail",
+        "test:integration": "node ./test/runTest.js",
+        "test": "npm run test:unit && npm run test:integration"
+    },
+    "devDependencies": {
+        "@vscode/test-electron": "^2.0.0",
+        "mocha": "^10.2.0",
+        "glob": "^8.1.0",
+        "chai": "^4.3.7"
     }
 }

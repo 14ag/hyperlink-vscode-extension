@@ -1,0 +1,8 @@
+{
+    "chat.tools.terminal.autoApprove": {
+        "/^node \\./test/runTest\\.js --vscodeExecutablePath \"C:\\\\Users\\\\philip\\\\sauce\\\\testbench\\\\\\.vscode-test\\\\vscode-win32-x64-archive-1\\.105\\.1\\\\Code\\.exe\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
+    }
+}

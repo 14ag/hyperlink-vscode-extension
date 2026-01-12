@@ -1,5 +1,6 @@
 @echo off
 for %%d in (*.vsix) do set oldExtension=%%d
+mkdir releases >nul 2>&1
 if defined oldExtension (
 	move "%oldExtension%" releases
 	if errorlevel 1 (
@@ -28,9 +29,9 @@ for /f "tokens=1-3 delims=/" %%a in ('date /t') do (
 echo _!x!_
 pause
 for /f "tokens=1-3 delims=:" %%a in ('time /t') do (
-	set hh=%%b
-	if "!hh:~0,1!"=="0" set hh=!hh:0=!
-	set y=!hh!
+	set mm=%%b
+	if "!mm:~0,1!"=="0" set mm=!mm:0=!
+	set y=!mm!
 	)
 if not defined x set x=0.0
 if not defined y set y=00
@@ -58,7 +59,7 @@ cmd /c "npm run package:vsix"
 
 :: release_v1.!x!-build!y!.extension
 if exist extension.vsix (
-	ren "extension-release.vsix" "extension-release_v1.!x!-build!y!.vsix"
+	ren "extension.vsix" "extension-release_v1.!x!-build!y!.vsix"
 ) else (
 	echo build failed
 	endlocal

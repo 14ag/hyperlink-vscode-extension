@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const os = require('os');
+const { execSync } = require('child_process');
 
 const PROJECT_DIR = __dirname;
 const JS_PATH = path.join(PROJECT_DIR, 'watermark-patch.js');
@@ -8,35 +9,100 @@ const CSS_PATH = path.join(PROJECT_DIR, 'watermark-style.css');
 
 function getPaths() {
     const platform = os.platform();
-    let vscodePath = '';
+    let vscodePath = process.env.VSCODE_PATH || '';
     let settingsPath = '';
+
+    if (!vscodePath) {
+        try {
+            const command = platform === 'win32' ? 'where code' : 'which code';
+            const output = execSync(command).toString().trim();
+            const codePath = output.split('\r\n')[0];
+
+            if (codePath) {
+                let potentialRoot = path.dirname(path.dirname(codePath));
+
+                if (platform === 'win32') {
+                    if (fs.existsSync(path.join(potentialRoot, 'resources', 'app'))) {
+                        vscodePath = potentialRoot;
+                    } else {
+                        let dir = path.dirname(codePath);
+                        if (fs.existsSync(path.join(dir, 'Code.exe'))) vscodePath = dir;
+                        else if (fs.existsSync(path.join(path.dirname(dir), 'Code.exe'))) vscodePath = path.dirname(dir);
+                    }
+                } else {
+                    if (fs.existsSync(path.join(potentialRoot, 'resources', 'app'))) {
+                        vscodePath = potentialRoot;
+                    }
+                }
+            }
+        } catch (e) { }
+    }
 
     if (platform === 'win32') {
         const localAppData = process.env.LOCALAPPDATA;
         const appData = process.env.APPDATA;
-        vscodePath = path.join(localAppData, 'Programs', 'Microsoft VS Code');
-        if (!fs.existsSync(path.join(vscodePath, 'Code.exe'))) {
-            vscodePath = 'C:\\Program Files\\Microsoft VS Code';
+
+        if (!vscodePath) {
+            // Try common paths
+            const commonPaths = [
+                path.join(localAppData, 'Programs', 'Microsoft VS Code'),
+                'C:\\Program Files\\Microsoft VS Code',
+                path.join(localAppData, 'Programs', 'Antigravity')
+            ];
+            for (const p of commonPaths) {
+                if (fs.existsSync(p)) {
+                    vscodePath = p;
+                    break;
+                }
+            }
         }
+
+        // Settings path for Antigravity might be different, but usually it's the same as Code
         settingsPath = path.join(appData, 'Code', 'User', 'settings.json');
+        if (!fs.existsSync(settingsPath)) {
+            const antigravitySettings = path.join(appData, 'Antigravity', 'User', 'settings.json');
+            if (fs.existsSync(antigravitySettings)) settingsPath = antigravitySettings;
+        }
     } else if (platform === 'darwin') {
-        vscodePath = '/Applications/Visual Studio Code.app/Contents/Resources/app';
+        if (!vscodePath) vscodePath = '/Applications/Visual Studio Code.app/Contents/Resources/app';
         settingsPath = path.join(os.homedir(), 'Library', 'Application Support', 'Code', 'User', 'settings.json');
     } else if (platform === 'linux') {
-        vscodePath = '/usr/share/code';
+        if (!vscodePath) vscodePath = '/usr/share/code';
         settingsPath = path.join(os.homedir(), '.config', 'Code', 'User', 'settings.json');
     }
 
-    const workbenchHtml = platform === 'darwin'
-        ? path.join(vscodePath, 'out', 'vs', 'code', 'browser', 'workbench', 'workbench.html')
-        : path.join(vscodePath, 'resources', 'app', 'out', 'vs', 'code', 'browser', 'workbench', 'workbench.html');
+    if (!vscodePath) {
+        throw new Error(`Could not detect VS Code installation path. Please set the VSCODE_PATH environment variable.`);
+    }
+
+    const potentialHtmlPaths = platform === 'darwin'
+        ? [path.join(vscodePath, 'out', 'vs', 'code', 'browser', 'workbench', 'workbench.html')]
+        : [
+            path.join(vscodePath, 'resources', 'app', 'out', 'vs', 'code', 'browser', 'workbench', 'workbench.html'),
+            path.join(vscodePath, 'resources', 'app', 'out', 'vs', 'code', 'electron-browser', 'workbench', 'workbench.html'),
+            path.join(vscodePath, 'out', 'vs', 'code', 'browser', 'workbench', 'workbench.html'),
+            path.join(vscodePath, 'out', 'vs', 'code', 'electron-browser', 'workbench', 'workbench.html')
+        ];
+
+    let workbenchHtml = '';
+    for (const p of potentialHtmlPaths) {
+        if (fs.existsSync(p)) {
+            workbenchHtml = p;
+            break;
+        }
+    }
+
+    if (!workbenchHtml) {
+        throw new Error(`Could not find workbench.html in ${vscodePath}. Checked:\n${potentialHtmlPaths.join('\n')}`);
+    }
 
     return { workbenchHtml, settingsPath };
 }
 
 function patch(customPaths) {
     const { workbenchHtml, settingsPath } = customPaths || getPaths();
-    if (!fs.existsSync(workbenchHtml)) throw new Error(`Could not find workbench.html at ${workbenchHtml}`);
+    console.log(`Using workbenchHtml: ${workbenchHtml}`);
+    console.log(`Using settingsPath: ${settingsPath}`);
 
     // 1. Patch workbench.html
     let html = fs.readFileSync(workbenchHtml, 'utf8');
@@ -65,6 +131,8 @@ function patch(customPaths) {
 
         fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 4), 'utf8');
         console.log('Updated settings.json');
+    } else {
+        console.log(`Settings file not found at ${settingsPath}, skipping settings patch.`);
     }
 }
 
@@ -102,9 +170,19 @@ function unpatch(customPaths) {
 
 const args = process.argv.slice(2);
 if (args[0] === 'patch') {
-    patch();
+    try {
+        patch();
+    } catch (e) {
+        console.error(e.message);
+        process.exit(1);
+    }
 } else if (args[0] === 'unpatch') {
-    unpatch();
+    try {
+        unpatch();
+    } catch (e) {
+        console.error(e.message);
+        process.exit(1);
+    }
 }
 
 module.exports = { patch, unpatch, getPaths };

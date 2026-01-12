@@ -3,7 +3,6 @@
 .gitignore
 .vscodeignore
 Project.md
-LICENSE
 *.ps1
 *.bat
 version.txt
