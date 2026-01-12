@@ -1,13 +1,13 @@
 {
-    "name": "hyperlink-vscode-extension",
-    "displayName": "Hyperlink VS Code Watermark",
+    "name": "hyperlink-vscode-dashboard",
+    "displayName": "Hyperlink VS Code Dashboard",
     "description": "Transforms the hardcoded VS Code watermark into interactive hyperlinks.",
-    "version": "1.1.0",
-    "publisher": "philip",
+  "version": "1.1.2612",
+    "publisher": "14ag",
     "icon": "icon.png",
     "repository": {
         "type": "git",
-        "url": "https://github.com/philip/hyperlink-vscode-extension"
+        "url": "https://github.com/14ag/hyperlink-vscode-extension"
     },
     "keywords": [
         "watermark",
